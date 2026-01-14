@@ -4,6 +4,10 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Icon from '@/components/ui/icon';
+import Header from '@/components/Header';
+import ProductCard from '@/components/ProductCard';
+import ProductDetail from '@/components/ProductDetail';
+import Footer from '@/components/Footer';
 
 interface Review {
   id: number;
@@ -65,21 +69,6 @@ export default function Index() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [newReview, setNewReview] = useState({ author: '', rating: 5, comment: '' });
 
-  const renderStars = (rating: number) => {
-    return (
-      <div className="flex gap-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Icon
-            key={star}
-            name={star <= rating ? 'Star' : 'Star'}
-            size={16}
-            className={star <= rating ? 'fill-accent text-accent' : 'text-border'}
-          />
-        ))}
-      </div>
-    );
-  };
-
   const handleSubmitReview = () => {
     if (!selectedProduct || !newReview.author || !newReview.comment) return;
     setNewReview({ author: '', rating: 5, comment: '' });
@@ -88,54 +77,7 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border sticky top-0 bg-background/95 backdrop-blur-sm z-50">
-        <nav className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-serif font-semibold text-foreground">ПРИНТЫ</h1>
-            <div className="hidden md:flex gap-8 items-center">
-              <button
-                onClick={() => setActiveSection('home')}
-                className="text-sm hover:text-accent transition-colors"
-              >
-                Главная
-              </button>
-              <button
-                onClick={() => setActiveSection('catalog')}
-                className="text-sm hover:text-accent transition-colors"
-              >
-                Каталог
-              </button>
-              <button
-                onClick={() => setActiveSection('about')}
-                className="text-sm hover:text-accent transition-colors"
-              >
-                О бренде
-              </button>
-              <button
-                onClick={() => setActiveSection('designer')}
-                className="text-sm hover:text-accent transition-colors"
-              >
-                Дизайнер
-              </button>
-              <button
-                onClick={() => setActiveSection('delivery')}
-                className="text-sm hover:text-accent transition-colors"
-              >
-                Доставка
-              </button>
-              <button
-                onClick={() => setActiveSection('contacts')}
-                className="text-sm hover:text-accent transition-colors"
-              >
-                Контакты
-              </button>
-            </div>
-            <Button variant="ghost" size="icon">
-              <Icon name="ShoppingBag" size={20} />
-            </Button>
-          </div>
-        </nav>
-      </header>
+      <Header activeSection={activeSection} onNavigate={setActiveSection} />
 
       <main>
         {activeSection === 'home' && (
@@ -166,32 +108,15 @@ export default function Index() {
                 </h3>
                 <div className="grid md:grid-cols-3 gap-8">
                   {products.map((product) => (
-                    <Card
+                    <ProductCard
                       key={product.id}
-                      className="overflow-hidden group cursor-pointer transition-transform hover:scale-[1.02]"
+                      product={product}
                       onClick={() => {
                         setSelectedProduct(product);
                         setActiveSection('catalog');
                       }}
-                    >
-                      <div className="aspect-square overflow-hidden bg-secondary/50">
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                      <div className="p-6">
-                        <h4 className="font-serif text-2xl mb-2">{product.name}</h4>
-                        <div className="flex items-center gap-2 mb-3">
-                          {renderStars(Math.round(product.rating))}
-                          <span className="text-sm text-muted-foreground">
-                            {product.rating} ({product.reviewCount})
-                          </span>
-                        </div>
-                        <p className="text-2xl font-light">{product.price} ₽</p>
-                      </div>
-                    </Card>
+                      variant="home"
+                    />
                   ))}
                 </div>
               </div>
@@ -207,120 +132,24 @@ export default function Index() {
               <div>
                 <div className="grid gap-8">
                   {products.map((product) => (
-                    <Card
+                    <ProductCard
                       key={product.id}
-                      className={`overflow-hidden cursor-pointer transition-all ${
-                        selectedProduct?.id === product.id ? 'ring-2 ring-primary' : ''
-                      }`}
+                      product={product}
                       onClick={() => setSelectedProduct(product)}
-                    >
-                      <div className="flex gap-6 p-6">
-                        <div className="w-32 h-32 flex-shrink-0 bg-secondary/50 rounded overflow-hidden">
-                          <img
-                            src={product.image}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-serif text-2xl mb-2">{product.name}</h3>
-                          <div className="flex items-center gap-2 mb-3">
-                            {renderStars(Math.round(product.rating))}
-                            <span className="text-sm text-muted-foreground">
-                              {product.rating} ({product.reviewCount} отзывов)
-                            </span>
-                          </div>
-                          <p className="text-xl font-light">{product.price} ₽</p>
-                        </div>
-                      </div>
-                    </Card>
+                      isSelected={selectedProduct?.id === product.id}
+                      variant="catalog"
+                    />
                   ))}
                 </div>
               </div>
 
               {selectedProduct && (
-                <div className="lg:sticky lg:top-24 h-fit animate-scale-in">
-                  <Card className="overflow-hidden">
-                    <div className="aspect-square bg-secondary/50">
-                      <img
-                        src={selectedProduct.image}
-                        alt={selectedProduct.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="p-8">
-                      <h3 className="font-serif text-3xl mb-4">{selectedProduct.name}</h3>
-                      <div className="flex items-center gap-3 mb-6">
-                        {renderStars(Math.round(selectedProduct.rating))}
-                        <span className="text-muted-foreground">
-                          {selectedProduct.rating} ({selectedProduct.reviewCount} отзывов)
-                        </span>
-                      </div>
-                      <p className="text-3xl font-light mb-6">{selectedProduct.price} ₽</p>
-                      <Button size="lg" className="w-full mb-8">
-                        Добавить в корзину
-                      </Button>
-
-                      <div className="border-t border-border pt-8">
-                        <h4 className="font-serif text-2xl mb-6">Отзывы покупателей</h4>
-                        <div className="space-y-6 mb-8">
-                          {selectedProduct.reviews.map((review) => (
-                            <div key={review.id} className="space-y-2">
-                              <div className="flex items-center justify-between">
-                                <span className="font-medium">{review.author}</span>
-                                <span className="text-sm text-muted-foreground">{review.date}</span>
-                              </div>
-                              {renderStars(review.rating)}
-                              <p className="text-muted-foreground leading-relaxed">{review.comment}</p>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="space-y-4 border-t border-border pt-8">
-                          <h5 className="font-medium text-lg">Оставить отзыв</h5>
-                          <Input
-                            placeholder="Ваше имя"
-                            value={newReview.author}
-                            onChange={(e) => setNewReview({ ...newReview, author: e.target.value })}
-                          />
-                          <div>
-                            <label className="text-sm text-muted-foreground mb-2 block">
-                              Оценка
-                            </label>
-                            <div className="flex gap-2">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                  key={star}
-                                  onClick={() => setNewReview({ ...newReview, rating: star })}
-                                  className="transition-colors"
-                                >
-                                  <Icon
-                                    name="Star"
-                                    size={24}
-                                    className={
-                                      star <= newReview.rating
-                                        ? 'fill-accent text-accent'
-                                        : 'text-border'
-                                    }
-                                  />
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                          <Textarea
-                            placeholder="Ваш отзыв"
-                            value={newReview.comment}
-                            onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-                            rows={4}
-                          />
-                          <Button onClick={handleSubmitReview} className="w-full">
-                            Отправить отзыв
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                </div>
+                <ProductDetail
+                  product={selectedProduct}
+                  newReview={newReview}
+                  onReviewChange={setNewReview}
+                  onSubmitReview={handleSubmitReview}
+                />
               )}
             </div>
           </section>
@@ -448,56 +277,7 @@ export default function Index() {
         )}
       </main>
 
-      <footer className="border-t border-border mt-20">
-        <div className="container mx-auto px-6 py-12">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <h3 className="font-serif text-2xl mb-4">ПРИНТЫ</h3>
-              <p className="text-sm text-muted-foreground">
-                Авторские футболки с уникальными принтами
-              </p>
-            </div>
-            <div>
-              <h4 className="font-medium mb-3">Покупателям</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <button onClick={() => setActiveSection('delivery')}>Доставка</button>
-                </li>
-                <li>Оплата</li>
-                <li>Возврат</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-medium mb-3">О компании</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <button onClick={() => setActiveSection('about')}>О бренде</button>
-                </li>
-                <li>
-                  <button onClick={() => setActiveSection('designer')}>Дизайнер</button>
-                </li>
-                <li>
-                  <button onClick={() => setActiveSection('contacts')}>Контакты</button>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-medium mb-3">Социальные сети</h4>
-              <div className="flex gap-3">
-                <Button variant="ghost" size="icon">
-                  <Icon name="Instagram" size={20} />
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <Icon name="Facebook" size={20} />
-                </Button>
-              </div>
-            </div>
-          </div>
-          <div className="border-t border-border pt-8 text-sm text-muted-foreground text-center">
-            © 2026 ПРИНТЫ. Все права защищены.
-          </div>
-        </div>
-      </footer>
+      <Footer onNavigate={setActiveSection} />
     </div>
   );
 }
